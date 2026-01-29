@@ -101,12 +101,12 @@ SBStreamer::SBStreamer(RequestBroker* imageService /*= nullptr*/)
 bool SBStreamer::HandleRequest(handle* handle)
 {
     if (!IsAborted()) {
-        const std::string& requrl = RequestBroker::GetRequestURI(handle);
+        const std::string& requrl = RequestBroker::GetRequestPath(handle);
         if (requrl.compare(0, strlen(SBSTREAMER_URI), SBSTREAMER_URI) == 0) {
             switch (RequestBroker::GetRequestMethod(handle)) {
             case RequestBroker::Method_GET: {
                 std::vector<std::string> params;
-                readParameters(requrl, params);
+        		tokenize(RequestBroker::GetURIParams(handle), "&", "", params, true);
                 int stream = atoi(getParamValue(params, "stream").c_str());
                 streamSqueezeBox(handle, stream);
                 return true;
@@ -235,14 +235,6 @@ void SBStreamer::Reply429(handle* handle)
     std::string resp;
     resp.append(RequestBroker::MakeResponseHeader(RequestBroker::Status_Too_Many_Requests)).append("\r\n");
     RequestBroker::Reply(handle, resp.c_str(), resp.length());
-}
-
-void SBStreamer::readParameters(const std::string& streamUrl, std::vector<std::string>& params)
-{
-    size_t s = streamUrl.find('?');
-    if (s != std::string::npos) {
-        tokenize(streamUrl.substr(s + 1), "&", params, true);
-    }
 }
 
 std::string SBStreamer::getParamValue(const std::vector<std::string>& params, const std::string& name)

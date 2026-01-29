@@ -28,8 +28,8 @@
 
 namespace NSROOT {
 
-class FrameBuffer;
-class FramePacket;
+class RingBuffer;
+class RingBufferPacket;
 
 class SBEncoder {
     friend class SBEncoderStream;
@@ -69,8 +69,8 @@ private:
     unsigned m_stream;
     FLAC__int32* m_pcm;
 
-    FrameBuffer* m_buffer;
-    FramePacket* m_packet;
+    RingBuffer* m_buffer;
+    RingBufferPacket* m_packet;
     int m_consumed;
 
     class SBEncoderStream : public FLAC::Encoder::Stream {

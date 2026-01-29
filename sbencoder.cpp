@@ -18,12 +18,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "sbencoder.h"
-#include "framebuffer.h"
+#include "private/ringbuffer.h"
 #include "private/byteorder.h"
 #include <unistd.h>
 
 #define SAMPLES 1024
-#define FRAME_BUFFER_SIZE 256
+#define RING_BUFFER_SIZE 256
 
 extern "C" {
 uint32_t get_sb_time_ms(void);
@@ -45,7 +45,7 @@ SBEncoder::SBEncoder(int stream)
     , m_consumed(0)
     , m_encoder(nullptr)
 {
-    m_buffer = new FrameBuffer(FRAME_BUFFER_SIZE);
+    m_buffer = new RingBuffer(RING_BUFFER_SIZE);
     m_encoder = new SBEncoderStream(this);
 }
 
@@ -157,15 +157,15 @@ int SBEncoder::encode(const char* data, int len)
                 data += 1;
                 break;
             case 16:
-                m_pcm[i] = read16le(data);
+                m_pcm[i] = read_b16le(data);
                 data += 2;
                 break;
             case 24:
-                m_pcm[i] = read24le(data);
+                m_pcm[i] = read_b24le(data);
                 data += 3;
                 break;
             case 32:
-                m_pcm[i] = read32le(data);
+                m_pcm[i] = read_b32le(data);
                 data += 4;
                 break;
             default:
